@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фирменная аватарка</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Фон "шахматная доска" */
+        .checkerboard {
+            background-color: #e5e5f7;
+            background-image:  linear-gradient(45deg, #c1c1c1 25%, transparent 25%), 
+                               linear-gradient(-45deg, #c1c1c1 25%, transparent 25%), 
+                               linear-gradient(45deg, transparent 75%, #c1c1c1 75%), 
+                               linear-gradient(-45deg, transparent 75%, #c1c1c1 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        
+        #editor {
+            cursor: grab;
+            touch-action: none;
+        }
+        #editor:active {
+            cursor: grabbing;
+        }
+        
+        input[type=range] {
+            accent-color: #3b82f6;
+        }
+
+        /* Убираем стандартные рамки у выбора цвета */
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+        
+        /* Применяем шрифт к полю ввода инициалов для наглядности */
+        #initials-input {
+            font-family: 'Nunito', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col text-gray-800" style="font-family: 'Nunito', sans-serif;">
+
+    <header class="bg-white shadow-sm border-b border-gray-200 py-4 px-6">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Фирменная аватарка
+            </h1>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col lg:flex-row max-w-7xl w-full mx-auto p-4 lg:p-6 gap-6">
+        
+        <aside class="w-full lg:w-1/3 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-6 h-fit">
+            
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">1. Выберите шаблон</label>
+                <select id="template-select" class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer text-sm font-bold">
+                    </select>
+            </div>
+
+            <hr class="border-gray-100">
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">2. Выберите фон</label>
+                
+                <label for="image-upload" class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-blue-400 transition-colors mb-3">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg class="w-7 h-7 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        <p class="mb-1 text-sm text-gray-500"><span class="font-bold">Загрузить фотографию</span></p>
+                    </div>
+                    <input id="image-upload" type="file" accept="image/*" class="hidden" />
+                </label>
+
+                <div class="flex items-center justify-between border border-gray-200 rounded-xl p-3 bg-gray-50 hover:border-blue-400 transition-colors">
+                    <label for="bg-color-picker" class="text-sm font-bold text-gray-700 cursor-pointer w-full">Или сплошной цвет:</label>
+                    <input type="color" id="bg-color-picker" value="#3b82f6" class="w-8 h-8 cursor-pointer border-0 p-0 bg-transparent">
+                </div>
+            </div>
+
+            <div id="initials-controls" class="opacity-50 pointer-events-none transition-opacity border-l-4 border-blue-100 pl-4">
+                 <label class="block text-sm font-bold text-gray-700 mb-2">3. Настройка инициалов</label>
+                 <div class="flex gap-3 mb-3">
+                     <input type="text" id="initials-input" maxlength="2" placeholder="АБ" class="w-20 border border-gray-300 rounded-lg p-2 text-center text-xl font-black uppercase focus:ring-1 focus:ring-blue-500 focus:outline-none bg-gray-50">
+                     <div class="flex-1 flex items-center justify-between border border-gray-200 rounded-xl p-2 bg-gray-50 hover:border-blue-400 transition-colors">
+                        <label for="text-color-picker" class="text-xs font-bold text-gray-700 cursor-pointer w-full pl-1">Цвет букв:</label>
+                        <input type="color" id="text-color-picker" value="#ffffff" class="w-8 h-8 cursor-pointer border-0 p-0 bg-transparent">
+                     </div>
+                 </div>
+                 <p class="text-xs text-gray-500">Доступно только при выбранном сплошном цвете фона.</p>
+            </div>
+
+            <hr class="border-gray-100">
+
+            <div id="controls" class="opacity-50 pointer-events-none transition-opacity">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block text-sm font-bold text-gray-700">4. Масштаб и позиция</label>
+                    <button id="reset-btn" class="text-xs text-blue-500 hover:text-blue-700 font-bold">Сбросить</button>
+                </div>
+                <input id="scale-slider" type="range" min="0.1" max="3" step="0.01" value="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                <p class="text-xs text-gray-500 mt-2 text-center">Вы также можете перемещать картинку мышью по холсту</p>
+            </div>
+
+            <hr class="border-gray-100">
+
+            <button id="download-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-md shadow-blue-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4-4m4 4V4"></path></svg>
+                Скачать аватарку
+            </button>
+        </aside>
+
+        <section class="w-full lg:w-2/3 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col relative">
+            <div class="w-full flex-1 min-h-[500px] checkerboard rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden relative" id="canvas-container">
+                <canvas id="editor" class="max-w-full max-h-full shadow-lg rounded object-contain"></canvas>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- КОНФИГУРАЦИЯ ШАБЛОНОВ ---
+        const templateConfig = [
+            { file: 'Шаблон_1.png', name: 'Кровля ∙ Фасад ∙ Забор' },
+            { file: 'Шаблон_2.png', name: 'Потолочные системы' },
+            { file: 'Шаблон_3.png', name: 'Долговечный профиль' }
+        ];
+
+        // --- СОСТОЯНИЕ ПРИЛОЖЕНИЯ ---
+        const canvas = document.getElementById('editor');
+        const ctx = canvas.getContext('2d');
+        
+        let templateImg = new Image();
+        let uploadedImg = null;
+        
+        let bgMode = 'none'; 
+        let bgColor = '#3b82f6';
+
+        // Настройки инициалов
+        let initialsText = 'АБ';
+        let initialsColor = '#ffffff';
+        
+        let imgX = 0;
+        let imgY = 0;
+        let imgScale = 1;
+        let minScale = 1; 
+
+        let isDragging = false;
+        let startDragX = 0;
+        let startDragY = 0;
+
+        // --- ЭЛЕМЕНТЫ УПРАВЛЕНИЯ ---
+        const templateSelect = document.getElementById('template-select');
+        const uploadInput = document.getElementById('image-upload');
+        const colorPicker = document.getElementById('bg-color-picker');
+        
+        // Элементы инициалов
+        const initialsControlsDiv = document.getElementById('initials-controls');
+        const initialsInput = document.getElementById('initials-input');
+        const textColorPicker = document.getElementById('text-color-picker');
+
+        const scaleSlider = document.getElementById('scale-slider');
+        const resetBtn = document.getElementById('reset-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const controlsDiv = document.getElementById('controls');
+
+        // --- ФУНКЦИИ ---
+
+        function initTemplateSelect() {
+            templateConfig.forEach((tpl, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = tpl.name;
+                templateSelect.appendChild(option);
+            });
+            loadTemplate(0);
+        }
+
+        function loadTemplate(index) {
+            const selectedTemplate = templateConfig[index];
+            templateImg.onload = () => {
+                canvas.width = 1000;
+                canvas.height = 1000;
+                if (bgMode === 'image' && uploadedImg) { fitImageToCanvas(); }
+                render();
+            };
+            templateImg.onerror = () => { alert(`Ошибка: Файл '${selectedTemplate.file}' не найден.`); };
+            templateImg.src = selectedTemplate.file;
+        }
+
+        function fitImageToCanvas() {
+            if (!uploadedImg) return;
+            const scaleX = canvas.width / uploadedImg.width;
+            const scaleY = canvas.height / uploadedImg.height;
+            minScale = Math.max(scaleX, scaleY);
+            imgScale = minScale; 
+            imgX = (canvas.width - uploadedImg.width * imgScale) / 2;
+            imgY = (canvas.height - uploadedImg.height * imgScale) / 2;
+            scaleSlider.min = minScale.toFixed(4);
+            scaleSlider.max = (minScale * 3).toFixed(4);
+            scaleSlider.value = imgScale;
+            downloadBtn.removeAttribute('disabled');
+        }
+
+        function clampPosition() {
+            if (bgMode !== 'image' || !uploadedImg) return;
+            const currentW = uploadedImg.width * imgScale;
+            const currentH = uploadedImg.height * imgScale;
+            if (imgX > 0) imgX = 0;
+            if (imgY > 0) imgY = 0;
+            if (imgX + currentW < canvas.width) imgX = canvas.width - currentW;
+            if (imgY + currentH < canvas.height) imgY = canvas.height - currentH;
+        }
+
+        // Основная функция отрисовки
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Отрисовка заднего фона
+            if (bgMode === 'color') {
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // --- Отрисовка инициалов ---
+                if (initialsText) {
+                    ctx.save();
+                    ctx.fillStyle = initialsColor;
+                    ctx.textAlign = 'center';
+                    
+                    // Выравнивание по центру относительно заданной координаты Y
+                    ctx.textBaseline = 'middle'; 
+                    
+                    // Используем подключенный Google-шрифт Nunito. Вес 800 делает его жирным и мягким.
+                    ctx.font = "800 400px 'Nunito', sans-serif";
+                    
+                    // Позиционируем текст по центру (по ширине) и на 365px от верхнего края
+                    ctx.fillText(initialsText.toUpperCase(), canvas.width / 2, 365);
+                    ctx.restore();
+                }
+            } else if (bgMode === 'image' && uploadedImg) {
+                const w = uploadedImg.width * imgScale;
+                const h = uploadedImg.height * imgScale;
+                ctx.drawImage(uploadedImg, imgX, imgY, w, h);
+            }
+            
+            // 2. Отрисовка шаблона поверх
+            if (templateImg.complete) {
+                ctx.drawImage(templateImg, 0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // --- СОБЫТИЯ ---
+
+        templateSelect.addEventListener('change', (e) => loadTemplate(e.target.value));
+
+        // Выбор цвета фона
+        colorPicker.addEventListener('input', (e) => {
+            bgMode = 'color';
+            bgColor = e.target.value;
+            
+            initialsControlsDiv.classList.remove('opacity-50', 'pointer-events-none');
+            initialsControlsDiv.classList.add('border-blue-400');
+            initialsControlsDiv.classList.remove('border-blue-100');
+            controlsDiv.classList.add('opacity-50', 'pointer-events-none');
+            
+            downloadBtn.removeAttribute('disabled');
+            render();
+        });
+
+        // Загрузка картинки
+        uploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    uploadedImg = img;
+                    bgMode = 'image';
+                    
+                    initialsControlsDiv.classList.add('opacity-50', 'pointer-events-none');
+                    initialsControlsDiv.classList.add('border-blue-100');
+                    initialsControlsDiv.classList.remove('border-blue-400');
+                    controlsDiv.classList.remove('opacity-50', 'pointer-events-none');
+                    
+                    fitImageToCanvas();
+                    render();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Ввод текста (только 2 буквы, CAPS)
+        initialsInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+            initialsText = e.target.value;
+            render();
+        });
+
+        // Выбор цвета текста
+        textColorPicker.addEventListener('input', (e) => {
+            initialsColor = e.target.value;
+            render();
+        });
+
+        // Масштаб
+        scaleSlider.addEventListener('input', (e) => {
+            if (bgMode !== 'image' || !uploadedImg) return;
+            const newScale = Math.max(parseFloat(e.target.value), minScale); 
+            const currentW = uploadedImg.width * imgScale;
+            const currentH = uploadedImg.height * imgScale;
+            const centerX = imgX + currentW / 2;
+            const centerY = imgY + currentH / 2;
+            imgScale = newScale;
+            imgX = centerX - (uploadedImg.width * imgScale) / 2;
+            imgY = centerY - (uploadedImg.height * imgScale) / 2;
+            clampPosition();
+            render();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (bgMode === 'image') { fitImageToCanvas(); render(); }
+        });
+
+        // --- ПЕРЕТАСКИВАНИЕ ---
+        function getPointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX = e.clientX; let clientY = e.clientY;
+            if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+            return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+        }
+        function handleDragStart(e) {
+            if (bgMode !== 'image' || !uploadedImg) return;
+            isDragging = true; const pos = getPointerPos(e); startDragX = pos.x - imgX; startDragY = pos.y - imgY;
+        }
+        function handleDragMove(e) {
+            if (!isDragging || bgMode !== 'image' || !uploadedImg) return;
+            e.preventDefault(); const pos = getPointerPos(e); imgX = pos.x - startDragX; imgY = pos.y - startDragY; clampPosition(); render();
+        }
+        function handleDragEnd() { isDragging = false; }
+        canvas.addEventListener('mousedown', handleDragStart);
+        canvas.addEventListener('mousemove', handleDragMove);
+        window.addEventListener('mouseup', handleDragEnd);
+        canvas.addEventListener('touchstart', handleDragStart, { passive: false });
+        canvas.addEventListener('touchmove', handleDragMove, { passive: false });
+        window.addEventListener('touchend', handleDragEnd);
+
+        // --- СКАЧИВАНИЕ ---
+        downloadBtn.addEventListener('click', () => {
+            try {
+                const dataURL = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `avatar-${Date.now()}.png`;
+                link.href = dataURL;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (err) { alert('Ошибка скачивания.'); }
+        });
+
+        // Запускаем приложение
+        initTemplateSelect();
+        
+        // Важно: перерисовываем холст, как только загрузится веб-шрифт, чтобы буквы сразу стали круглыми
+        document.fonts.ready.then(() => {
+            render();
+        });
+
+    </script>
+</body>
+</html>
